@@ -4,33 +4,33 @@
 #include <string>
 #include <sstream>
 #include <unordered_map>
-#include <stdexcept> // Para manejo de excepciones
+#include <stdexcept>
 using namespace std;
 
-// Definición de una estructura de nodo para una lista doblemente enlazada
+// Definición de la estructura Node para la lista doblemente enlazada
 struct Node {
-    long long data; // Almacena datos de tipo long long (para direcciones IP)
-    Node* next;     // Puntero al siguiente nodo
-    Node* previous; // Puntero al nodo anterior
+    long long data;
+    Node* next;
+    Node* previous;
 };
 
-// Definición de una clase para una lista doblemente enlazada
+// Definición de la clase dLinkedList para la lista doblemente enlazada
 class dLinkedList {
 public:
-    Node* head; // Puntero al primer nodo
-    Node* tail; // Puntero al último nodo
-    dLinkedList(); // Constructor
-    ~dLinkedList(); // Destructor para liberar memoria
-    void push(long long); // Método para agregar un nodo al inicio de la lista
+    Node* head;
+    Node* tail;
+    dLinkedList();
+    ~dLinkedList();
+    void push(long long);
 };
 
-// Constructor de la lista doblemente enlazada
+// Constructor de la clase dLinkedList
 dLinkedList::dLinkedList() {
     head = nullptr;
     tail = nullptr;
 }
 
-// Destructor de la lista doblemente enlazada para liberar memoria de nodos
+// Destructor de la clase dLinkedList
 dLinkedList::~dLinkedList() {
     while (head != nullptr) {
         Node* temp = head;
@@ -39,7 +39,7 @@ dLinkedList::~dLinkedList() {
     }
 }
 
-// Método para agregar un nodo al inicio de la lista
+// Método para agregar un elemento al principio de la lista
 void dLinkedList::push(long long data) {
     Node* new_node = new Node;
     new_node->data = data;
@@ -59,7 +59,7 @@ void dLinkedList::push(long long data) {
     }
 }
 
-// Función para ordenar un vector usando el algoritmo de Merge Sort
+// Función para realizar la ordenación Merge Sort en un vector
 void ordenaMerge(vector<long long int>& a, int low, int high) {
     if (low < high) {
         int mid = low + (high - low) / 2;
@@ -96,7 +96,7 @@ void ordenaMerge(vector<long long int>& a, int low, int high) {
     }
 }
 
-// Función para convertir una dirección IP en formato de cadena a un número long long
+// Función para convertir una dirección IP de formato string a entero long long
 long long stringToLongIP(const string& full_ip) {
     try {
         size_t colonPos = full_ip.find(":");
@@ -124,7 +124,7 @@ long long stringToLongIP(const string& full_ip) {
     }
 }
 
-// Función para realizar una búsqueda binaria en la lista doblemente enlazada
+// Función de búsqueda binaria en la lista doblemente enlazada
 Node* binarySearch(Node* tail, Node* head, long long key, long long low, long long high) {
     long long diferencia_kt = abs(key - tail->data);
     long long diferencia_kh = abs(key - head->data);
@@ -182,7 +182,7 @@ Node* binarySearch(Node* tail, Node* head, long long key, long long low, long lo
     }
 }
 
-// Función principal para leer, almacenar, ordenar y buscar direcciones IP
+// Función para leer, almacenar y ordenar los datos de la bitácora
 void leerAlmacenarOrdenar(const string& l, const string& r) {
     ifstream bitacora;
     bitacora.open("bitacora.txt", ios::in);
@@ -190,6 +190,7 @@ void leerAlmacenarOrdenar(const string& l, const string& r) {
         cerr << "Error: No se pudo abrir el archivo 'bitacora.txt'." << endl;
     }
     else {
+        // Mapa no ordenado para almacenar información de IP y líneas correspondientes
         unordered_map<long long int, string> infoMap;
         string line;
         vector<long long int> Ip_Desordenadas;
@@ -209,6 +210,7 @@ void leerAlmacenarOrdenar(const string& l, const string& r) {
             infoMap[key] = line;
             Ip_Desordenadas.push_back(key);
         }
+        // Llamada a la función de ordenación Merge Sort
         ordenaMerge(Ip_Desordenadas, 0, Ip_Desordenadas.size() - 1);
         dLinkedList lista;
         for (long long key : Ip_Desordenadas) {
@@ -218,34 +220,46 @@ void leerAlmacenarOrdenar(const string& l, const string& r) {
         long long int ipFinal = stringToLongIP(r);
         Node* inicio_busqueda = binarySearch(lista.tail, lista.head, ipInicio, 0, Ip_Desordenadas.size() - 1);
         Node* final_busqueda = binarySearch(lista.tail, lista.head, ipFinal, 0, Ip_Desordenadas.size() - 1);
-        if (inicio_busqueda != nullptr && final_busqueda != nullptr) {
-            Node* current_node = inicio_busqueda;
-            cout << "Las IP han sido encontradas:" << endl;
-            while (current_node != final_busqueda->previous) {
-                cout << "Forma 1: " << infoMap[current_node->data] << endl;
-                current_node = current_node->previous;
-            }
-        }
-        else {
-            vector<string> rango_fechas;
-            cout << "Las IP no han sido encontradas, pero se muestra el rango a partir de las IPs proporcionadas:" << endl;
-            for (long long int i : Ip_Desordenadas) {
-                if (i >= ipInicio && i <= ipFinal) {
-                    long long int key = i;
-                    auto it = infoMap.find(key);
-                    rango_fechas.push_back(it->second);
-                    cout << "Forma 2: " << it->second << endl;
+
+        ofstream resultados("resultados.txt"); // Abrir un archivo para escribir los resultados
+
+        if (resultados.is_open()) {
+            if (inicio_busqueda != nullptr && final_busqueda != nullptr) {
+                Node* current_node = inicio_busqueda;
+                resultados << "Las IP han sido encontradas:" << endl;
+                while (current_node != final_busqueda->previous) {
+                    resultados << "Forma 1: " << infoMap[current_node->data] << endl;
+                    current_node = current_node->previous;
                 }
             }
-            if (rango_fechas.empty()) {
-                cout << "No se encontraron registros en el rango especificado." << endl;
+            else {
+                vector<string> rango_fechas;
+                resultados << "Las IP no han sido encontradas, pero se muestra el rango a partir de las IPs proporcionadas:" << endl;
+                for (long long int i : Ip_Desordenadas) {
+                    if (i >= ipInicio && i <= ipFinal) {
+                        long long int key = i;
+                        auto it = infoMap.find(key);
+                        rango_fechas.push_back(it->second);
+                        resultados << "Forma 2: " << it->second << endl;
+                    }
+                }
+                if (rango_fechas.empty()) {
+                    resultados << "No se encontraron registros en el rango especificado." << endl;
+                }
             }
+
+            resultados.close(); // Cerrar el archivo de resultados
+
+            cout << "Los resultados se han guardado en 'resultados.txt'." << endl;
         }
+        else {
+            cerr << "Error: No se pudo abrir el archivo de resultados." << endl;
+        }
+
         bitacora.close();
     }
 }
 
-// Función principal del programa
 int main() {
     cout << "Elige una IP de inicio y final (con números) para la búsqueda: " << endl;
     cout << "Ejemplo: ###.##.###.###:####" << endl;
