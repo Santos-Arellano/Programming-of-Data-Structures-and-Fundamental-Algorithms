@@ -12,10 +12,12 @@ struct node{
         }
 };
 
+
 class BinarySearchTree{
-public:
+private:
    node *raiz;
    int altura;
+public:
    BinarySearchTree();
    void push(int num);
    void preOrder(node* root);
@@ -32,6 +34,7 @@ BinarySearchTree::BinarySearchTree(){
     raiz=nullptr;
 }
 
+
 void BinarySearchTree::push(int num){
     node* nodo=new node;
     nodo->data=num;
@@ -40,7 +43,7 @@ void BinarySearchTree::push(int num){
         altura+=1;
     }else{
         node*ptr=raiz;
-        while(ptr!=nullptr){ 
+        while(ptr!=nullptr){
            if(nodo->data<ptr->data&&ptr->left==nullptr){
                 ptr->left=nodo;
                 break;
@@ -54,7 +57,7 @@ void BinarySearchTree::push(int num){
                 ptr=ptr->left;
             }else{
                 ptr=ptr->right;
-                
+               
             }
         }
     }
@@ -88,6 +91,7 @@ void BinarySearchTree::levelByLevel(node* root, int level) {
         return;
     }
 
+
     if (level == 1) {
         cout << root->data << " ";
     }
@@ -109,12 +113,12 @@ void BinarySearchTree::visit(BinarySearchTree* arbolito){
         arbolito->preOrder
 (arbolito->raiz);
         cout<<endl;
-    
+   
     }else if(op==2){
         cout<<"Opcion seleccionada (2. inOrder)"<<endl;
         arbolito->inOrder(arbolito->raiz);
         cout<<endl;
-    
+   
     }else if(op==3){
         cout<<"Opcion seleccionada (3. postOrder)"<<endl;
         arbolito->postOrder
@@ -122,7 +126,7 @@ void BinarySearchTree::visit(BinarySearchTree* arbolito){
         cout<<endl;
     }else if(op==4){
         cout<<"Opcion seleccionada (4. Level by level)"<<endl;
-        for (int i = 1; i < arbolito->height(arbolito->raiz); i++) {
+        for (int i = 1; i <= arbolito->height(arbolito->raiz); i++) {
             cout << "Nivel " << i << ": ";
             arbolito->levelByLevel(arbolito->raiz, i);
             cout << endl;
@@ -131,6 +135,7 @@ void BinarySearchTree::visit(BinarySearchTree* arbolito){
         cout<<"Esa no es una opcion disponible"<<endl;
     }
 }
+
 
 int BinarySearchTree::height(node* root) {
     if (root == nullptr) {
