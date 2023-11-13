@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "/Users/santosarellanoolarte/Documents/GitHub/Programming-of-Data-Structures-and-Fundamental-Algorithms/Act 4.1 - Grafo Sus Representaciones Y Sus Recorridos",
+      "program": "/Users/santosarellanoolarte/Documents/GitHub/Programming-of-Data-Structures-and-Fundamental-Algorithms/Act 4.1 - Grafo Sus Representaciones Y Sus Recorridos/build/Debug/outDebug"
+    }
+  ]
+}

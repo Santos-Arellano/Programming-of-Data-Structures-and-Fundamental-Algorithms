@@ -27,6 +27,7 @@ void cargarGrafo(int N, int M, vector<vector<int > >& matrizAdj, vector<vector<i
             listaAdj[v].push_back(u);
         } catch (const out_of_range& e) {
             cout << e.what() << endl;
+            cout << "Intenta de nuevo." << endl;
             --i;  // Reintenta la entrada para esta arista
         }
     }
@@ -87,6 +88,13 @@ int main() {
     int N, M;
     cout << "Ingrese el número de vértices (N): ";
     cin >> N;
+
+    // Validación adicional para evitar divisiones por cero
+    while (N <= 0) {
+        cout << "Ingrese un número de vértices válido (mayor que cero): ";
+        cin >> N;
+    }
+
     cout << "Ingrese el número de aristas (M): ";
     cin >> M;
 
