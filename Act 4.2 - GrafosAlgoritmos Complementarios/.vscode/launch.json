@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "/Users/santosarellanoolarte/Documents/GitHub/Programming-of-Data-Structures-and-Fundamental-Algorithms/Act 4.2 - GrafosAlgoritmos Complementarios",
+      "program": "/Users/santosarellanoolarte/Documents/GitHub/Programming-of-Data-Structures-and-Fundamental-Algorithms/Act 4.2 - GrafosAlgoritmos Complementarios/build/Debug/outDebug"
+    }
+  ]
+}
