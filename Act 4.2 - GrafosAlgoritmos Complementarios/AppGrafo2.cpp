@@ -1,210 +1,232 @@
 #include <iostream>
-#include <vector>
 #include <list>
-#include <ctime>
-#include <cstdlib>
+#include <stack>
+#include <queue>
+#include <vector>
+#include <algorithm>
 using namespace std;
 
 class Graph {
 private:
-    int numVertices;
-    int** adjMatrix;
-    list<int>* adjList;
-    bool* visited;
-
+    int V; // número de vértices
+    int E; // número de arcos
+    list<int> *adj; // Lista de adyacencia
 public:
-    Graph(int vertices);
-    ~Graph();
-    void LoadGraph();
-    void PrintMatrix();
-    void PrintList();
-    bool IsBipartite(int startVertex);
-    bool IsTree();
-    void TopologicalSort();
+    Graph(int V, int E);
+    void addEdge(int v, int w);
+    void DFS(int s);
+    void BFS(int s);
+    void loadGraph();
+    bool isTree();
+    void topologicalSort();
+    void topologicalSortUtil(int v, bool visited[], stack<int> &resultStack);
+    bool bipartiteGraph();
+    void displayList();
 };
 
-Graph::Graph(int vertices) {
-    numVertices = vertices;
-    adjMatrix = new int*[vertices];
-    for (int i = 0; i < vertices; i++) {
-        adjMatrix[i] = new int[vertices];
-        for (int j = 0; j < vertices; j++) {
-            adjMatrix[i][j] = 0;
-        }
-    }
-    adjList = new list<int>[vertices];
-    visited = nullptr;  // Initialize visited to nullptr
+Graph::Graph(int V, int E) {
+    this->V = V;
+    this->E = E;
+    adj = new list<int>[V];
+    loadGraph();
 }
 
-Graph::~Graph() {
-    delete[] visited;    // Deallocate memory for 'visited'
-    delete[] adjMatrix;  // Deallocate memory for 'adjMatrix'
-    delete[] adjList;    // Deallocate memory for 'adjList'
+void Graph::addEdge(int v, int w) {
+    adj[v].push_back(w);
 }
 
-void Graph::LoadGraph() {
-    srand(time(nullptr));  // this line generates a random number every time the
-                           // program is run. This is done in order to generate random edges and vertices.
-    visited = new bool[numVertices];  // Allocate memory for the member variable 'visited'
-    visited[0] = true;                // we assign the value of true to visited[0] because we start with the vertex 0.
-    int edgesCreated = 0;             // we create a variable called edgesCreated to store the
-                                       // number of edges that have been created.
-    while (edgesCreated < numVertices - 1) {  // we use a while loop to create the
-                                              // edges and vertices.
-        int src = rand() % numVertices;  // we use rand() % numVertices to generate
-                                          // a random number between 0 and the number of vertices.
-        int dest = rand() % numVertices;
-        if (!visited[dest] && src != dest) {  // we use this if statement to make
-                                               // sure that the source and destination are not the same and that the edge does not
-                                               // already exist. If the connection does not exist then we create it, but if it does
-                                               // then we do not create it.
-            visited[dest] = true;
-            adjMatrix[src][dest] = 1;
-            adjList[src].push_back(dest);
-            edgesCreated++;
-        }
+void Graph::loadGraph() {
+    int num1, num2;
+    for (int i = 0; i < E; i++) {
+        cout << "Ingresa el nodo al que le quieres añadir una conexión" << endl;
+        cin >> num1;
+        cout << "Ingresa el nodo con el que lo quieres conectar" << endl;
+        cin >> num2;
+        addEdge(num1, num2);
     }
 }
 
-void Graph::PrintMatrix() {
-    for (int i = 0; i < numVertices; i++) {
-        for (int j = 0; j < numVertices; j++) {
-            cout << adjMatrix[i][j] << " ";
-        }
-        cout << endl;
+void Graph::DFS(int s) {
+    bool *visited = new bool[V];
+    for (int i = 0; i < V; i++) {
+        visited[i] = false;
     }
-}
-
-void Graph::PrintList() {
-    for (int i = 0; i < numVertices; i++) {
-        cout << i << "  ";
-        for (auto neighbor : adjList[i]) {
-            cout << "-> " << neighbor << " ";
+    stack<int> stack;
+    stack.push(s);
+    while (!stack.empty()) {
+        s = stack.top();
+        stack.pop();
+        if (!visited[s]) {
+            cout << s << " ";
+            visited[s] = true;
         }
-        cout << endl;
-    }
-}
-
-bool Graph::IsBipartite(int startVertex) {  //
-    visited = new bool[numVertices];       // we create a vector called visited that will
-                                           // store the vertices that have been visited. of size numVertices.
-    fill(visited, visited + numVertices, false);  // we use the fill function to
-                                                  // fill the vector with the value of false.
-    vector<bool> color(numVertices);        // we create a vector called color that will
-                                           // store the color of each vertex. of size numVertices.
-    visited[startVertex] = true;            // we assign the value of true to
-                                           // visited[startVertex] because we start with the vertex 0.
-    color[startVertex] = 0;
-    list<int> queue;  // we create a list called queue to store the vertices that
-                      // have been visited.
-    queue.push_back(startVertex);  // we push the startVertex into the queue.
-    while (!queue.empty()) {  // while the queue is not empty.
-        int v = queue.front();  // we store the vertex that we are currently
-                                 // visiting.
-        queue.pop_front();       // we pop the vertex from the queue in order to visit
-        for (auto u : adjList[v]) {  // we iterate through the list of the vertex
-                                     // that we are currently visiting.
-            if (!visited[u]) {       // if the vertex has not been visited then we
-                                     // assign the value of true to visited[u] and the value of !color[v] to color[u] and
-                                     // we push the vertex into the queue.
-                visited[u] = true;    // we assign the value of true to visited[u]
-                                      // because we have visited the vertex.
-                color[u] = !color[v];  // we assign the value of !color[v] to
-                                      // color[u] because we have visited the vertex.
-                queue.push_back(u);
-            } else if (color[u] == color[v]) {
-                return false;
+        for (list<int>::iterator i = adj[s].begin(); i != adj[s].end(); ++i) {
+            if (!visited[*i]) {
+                stack.push(*i);
             }
+        }
+    }
+}
+
+void Graph::BFS(int s) {
+    bool *visited = new bool[V];
+    for (int i = 0; i < V; i++) {
+        visited[i] = false;
+    }
+    queue<int> queue;
+    queue.push(s);
+    while (!queue.empty()) {
+        s = queue.front();
+        queue.pop();
+        if (!visited[s]) {
+            cout << s << " ";
+            visited[s] = true;
+        }
+        for (list<int>::iterator i = adj[s].begin(); i != adj[s].end(); ++i) {
+            if (!visited[*i]) {
+                queue.push(*i);
+            }
+        }
+    }
+}
+
+void Graph::displayList() {
+    cout << "--------------------------------" << endl;
+    cout << "Lista de adyacencia" << endl;
+    for (int i = 0; i < V; i++) {
+        cout << "vertice: " << i << " [";
+        for (list<int>::iterator j = adj[i].begin(); j != adj[i].end(); j++) {
+            cout << *j << " ";
+        }
+        cout << "]" << endl;
+    }
+    cout << "--------------------------------" << endl;
+}
+
+bool Graph::isTree() {
+    int s = 0;
+    bool *visited = new bool[V];
+    if (E >= V) {
+        return false;
+    }
+    for (int i = 0; i < V; i++) {
+        visited[i] = false;
+    }
+    stack<int> stack;
+    stack.push(s);
+
+    while (!stack.empty()) {
+        s = stack.top();
+        stack.pop();
+        if (!visited[s]) {
+            visited[s] = true;
+        } else {
+            return false;
+        }
+        for (list<int>::iterator i = adj[s].begin(); i != adj[s].end(); ++i) {
+            if (!visited[*i]) {
+                stack.push(*i);
+            }
+        }
+    }
+    for (int n = 0; n < V; n++) {
+        if (visited[n] == false) {
+            return false;
         }
     }
     return true;
 }
 
-bool Graph::IsTree() {
-    visited = new bool[numVertices];
-    fill(visited, visited + numVertices, false);
-    list<int> queue;
-    queue.push_back(0);
-    int edgeCount = 0;  // Variable to count the number of edges
+bool Graph::bipartiteGraph() {
+    int s = 0;
+    bool *visited = new bool[V];
+    bool *colors = new bool[V];
+    for (int i = 0; i < V; i++) {
+        visited[i] = false;
+        if (i % 2 == 0) {
+            colors[i] = false;
+        } else if (i == 0) {
+            colors[i] = false;
+        } else {
+            colors[i] = true;
+        }
+    }
+    queue<int> queue;
+    queue.push(s);
     while (!queue.empty()) {
-        int v = queue.front();
-        queue.pop_front();
-        if (!visited[v]) {
-            visited[v] = true;
-            for (auto u : adjList[v]) {
-                if (!visited[u]) {
-                    queue.push_back(u);
-                    edgeCount++;  // Increment edge count for each unvisited
+        s = queue.front();
+        queue.pop();
+        if (!visited[s]) {
+            visited[s] = true;
+        }
+        for (list<int>::iterator i = adj[s].begin(); i != adj[s].end(); ++i) {
+            if (!visited[*i]) {
+                queue.push(*i);
+                if (colors[s] == colors[*i]) {
+                    cout << "No es bipartito." << endl;
+                    return false;
                 }
             }
-        } else {
-            return false;
         }
     }
-    // Check if the number of edges is one less than the number of vertices
-    return (edgeCount == numVertices - 1);
+    cout << "Es bipartito." << endl;
+    return true;
 }
 
-void Graph::TopologicalSort() {
-    vector<int> inDegree(numVertices, 0);  // we create a vector called inDegree
-                                            // that will store the inDegree of each vertex.
-    for (int i = 0; i < numVertices; i++) {  // we iterate through the number of
-                                              // vertices.
-        for (auto u : adjList[i]) {  // we iterate through the list of each vertex.
-            inDegree[u]++;           // we increment the inDegree of the vertex.
+void Graph::topologicalSort() {
+    stack<int> resultStack;
+    bool *visited = new bool[V];
+    for (int i = 0; i < V; i++) {
+        visited[i] = false;
+    }
+    for (int i = 0; i < V; i++) {
+        if (!visited[i]) {
+            topologicalSortUtil(i, visited, resultStack);
         }
     }
-    list<int> queue;  // we create a list called queue to store the vertices that
-                      // have been visited.
-    for (int i = 0; i < numVertices; i++) {  // we iterate through the number of
-                                             // vertices.
-        if (inDegree[i] == 0) {  // if the inDegree of the vertex is 0 then we push
-                                 // the vertex into the queue.
-            queue.push_back(i);
-        }
-    }
-    while (!queue.empty()) {  // while the queue is not empty.
-        int v = queue.front();  // we store the vertex that we are currently
-                                 // visiting.
-        queue.pop_front();       // we pop the vertex from the queue in order to visit
-        cout << v << " ";        // we print the vertex that we are currently visiting.
-        for (auto u : adjList[v]) {  // we iterate through the list of the vertex that
-                                     // we are currently visiting.
-            inDegree[u]--;           // we decrement the inDegree of the vertex.
-            if (inDegree[u] == 0) {  // if the inDegree of the vertex is 0 then we
-                                     // push the vertex into the queue.
-                queue.push_back(u);
-            }
-        }
+    cout << "Orden topológico: ";
+    while (!resultStack.empty()) {
+        cout << resultStack.top() << " ";
+        resultStack.pop();
     }
     cout << endl;
+}
+
+void Graph::topologicalSortUtil(int v, bool visited[], stack<int> &resultStack) {
+    visited[v] = true;
+    for (list<int>::iterator i = adj[v].begin(); i != adj[v].end(); ++i) {
+        if (!visited[*i]) {
+            topologicalSortUtil(*i, visited, resultStack);
+        }
+    }
+    resultStack.push(v);
 }
 
 int main() {
-    int n;
-    cout << "Enter the number of vertices (n): ";
-    cin >> n;
-    Graph g(n);
-    g.LoadGraph();
-    cout << endl << "Adjacency Matrix:" << endl;
-    g.PrintMatrix();
-    cout << endl << "Adjacency List:" << endl;
-    g.PrintList();
-    g.IsBipartite(0);
-    cout << endl;
-    if (g.IsBipartite(0)) {
-        cout << "The graph is bipartite" << endl;
+    int V, E;
+    cout << "Dime el numero de vertices para tu grafo" << endl;
+    cin >> V;
+    cout << "Dime el numero de conexiones en tu grafo" << endl;
+    cin >> E;
+    Graph g(V, E);
+    g.displayList();
+    
+    // Evaluar si es un árbol
+    if (g.isTree()) {
+        cout << "Es un árbol." << endl;
     } else {
-        cout << "The graph is not bipartite" << endl;
+        cout << "No es un árbol." << endl;
     }
-    cout << endl;
-    g.IsTree();
-    if (g.IsTree()) {
-        cout << "The graph is a tree" << endl;
+
+    // Evaluar si es bipartito
+    if (g.bipartiteGraph()) {
+        cout << "Es bipartito." << endl;
     } else {
-        cout << "The graph is not a tree" << endl;
+        cout << "No es bipartito." << endl;
     }
-    cout << endl << "Topological Sort:" << endl;
-    g.TopologicalSort();
+
+    // Orden topológico
+    g.topologicalSort();
+
     return 0;
 }
