@@ -3,26 +3,27 @@
 #include <list>
 #include <unordered_map>
 #include <sstream>
+#include <stdexcept>
 
 using namespace std;
 
 class Graph {
 private:
-    unordered_map<string, list<string>> adjList; // Lista de adyacencia con IP como clave y conexiones como valores
-    unordered_map<string, int> fanOutCount;      // Contador de fan-out para cada IP
-    unordered_map<string, int> segmentFanOut;    // Contador de fan-out para cada segmento
+    unordered_map<string, list<string>> adjList;
+    mutable unordered_map<string, int> fanOutCount;   // Ahora es mutable
+    mutable unordered_map<string, int> segmentFanOut; // Ahora es mutable
 
 public:
-    void addEdge(string sourceIP, string destIP);
-    void displayGraph();
-    void findFanOut();
+    void addEdge(const string& sourceIP, const string& destIP);
+    void displayGraph() const;
+    void findFanOut() const;
 };
 
-void Graph::addEdge(string sourceIP, string destIP) {
+void Graph::addEdge(const string& sourceIP, const string& destIP) {
     adjList[sourceIP].push_back(destIP);
 }
 
-void Graph::displayGraph() {
+void Graph::displayGraph() const {
     cout << "Lista de adyacencia:" << endl;
     for (const auto& entry : adjList) {
         cout << entry.first << " -> ";
@@ -33,18 +34,15 @@ void Graph::displayGraph() {
     }
 }
 
-void Graph::findFanOut() {
+void Graph::findFanOut() const {
     int maxFanOut = 0;
     string maxFanOutIP;
 
     for (const auto& entry : adjList) {
-        string segment = entry.first.substr(0, entry.first.rfind('.')); // Obtener el segmento de la IP
+        string segment = entry.first.substr(0, entry.first.rfind('.'));
         int fanOut = entry.second.size();
 
-        // Actualizar el contador de fan-out para la IP
         fanOutCount[entry.first] = fanOut;
-
-        // Actualizar el contador de fan-out para el segmento
         segmentFanOut[segment] += fanOut;
 
         cout << "Fan-Out de " << entry.first << ": " << fanOut << endl;
@@ -57,7 +55,6 @@ void Graph::findFanOut() {
 
     cout << "El nodo con el mayor Fan-Out es: " << maxFanOutIP << " con un Fan-Out de " << maxFanOut << endl;
 
-    // Encontrar el segmento con más fan-out
     int maxSegmentFanOut = 0;
     string maxSegment;
     for (const auto& entry : segmentFanOut) {
@@ -71,7 +68,6 @@ void Graph::findFanOut() {
 
     cout << "Segmento con más fan-out: " << maxSegment << ", con: " << maxSegmentFanOut << " aristas o conexiones de salida" << endl;
 
-    // Encontrar la IP del boot master en el segmento con más fan-out
     int maxBootMasterFanOut = 0;
     string bootMasterIP;
     for (const auto& entry : adjList) {
@@ -88,23 +84,29 @@ void Graph::findFanOut() {
 }
 
 int main() {
-    ifstream file("Bitacora.txt");
-    string line;
-    Graph g;
+    try {
+        ifstream file("Bitacora.txt");
+        if (!file.is_open()) {
+            throw runtime_error("Error al abrir el archivo");
+        }
 
-    while (getline(file, line)) {
-        // Analizar la línea y extraer la información necesaria
-        stringstream ss(line);
-        string month, day, time, ip, reason;
-        ss >> month >> day >> time >> ip >> reason;
+        string line;
+        Graph g;
 
-        // Agregar la conexión al grafo
-        g.addEdge(ip, reason);
+        while (getline(file, line)) {
+            stringstream ss(line);
+            string month, day, time, ip, reason;
+            ss >> month >> day >> time >> ip >> reason;
+
+            g.addEdge(ip, reason);
+        }
+
+        g.displayGraph();
+        g.findFanOut();
+    } catch (const exception& e) {
+        cerr << "Error: " << e.what() << endl;
+        return 1;
     }
-
-    // Mostrar el grafo y encontrar el Fan-Out
-    g.displayGraph();
-    g.findFanOut();
 
     return 0;
 }
