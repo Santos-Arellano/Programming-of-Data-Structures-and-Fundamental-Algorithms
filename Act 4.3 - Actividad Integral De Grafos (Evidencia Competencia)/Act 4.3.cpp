@@ -1,117 +1,128 @@
 #include <iostream>
-#include <fstream>
 #include <list>
-#include <unordered_map>
 #include <sstream>
-#include <stdexcept>
-
+#include <fstream>
+#include <stack>
+#include <queue>
+#include <set>
 using namespace std;
-
 class Graph {
 private:
-    unordered_map<string, list<string>> adjList;
-    mutable unordered_map<string, int> fanOutCount;   // Ahora es mutable
-    mutable unordered_map<string, int> segmentFanOut; // Ahora es mutable
-
+    int V; // número de vértices
+    int E; // número de Edges
+    set<int> *adj; 
 public:
-    void addEdge(const string& sourceIP, const string& destIP);
-    void displayGraph() const;
-    void findFanOut() const;
+    Graph(int V, int E);
+    void addEdge(int v, int w);
+    int fanOut(int v);
+    void displayList();
+    void maxFanOut(int n);
 };
 
-void Graph::addEdge(const string& sourceIP, const string& destIP) {
-    adjList[sourceIP].push_back(destIP);
+Graph::Graph(int V, int E) {
+    this->V = V;
+    this->E = E;
+    adj = new set<int>[V];
 }
 
-void Graph::displayGraph() const {
-    cout << "Lista de adyacencia:" << endl;
-    for (const auto& entry : adjList) {
-        cout << entry.first << " -> ";
-        for (const auto& dest : entry.second) {
-            cout << dest << " ";
-        }
-        cout << endl;
-    }
+void Graph::addEdge(int v, int w) {
+        adj[v].insert(w);
+ 
 }
 
-void Graph::findFanOut() const {
-    int maxFanOut = 0;
-    string maxFanOutIP;
+int Graph::fanOut(int v) {
+        return adj[v].size();
+}
 
-    for (const auto& entry : adjList) {
-        string segment = entry.first.substr(0, entry.first.rfind('.'));
-        int fanOut = entry.second.size();
-
-        fanOutCount[entry.first] = fanOut;
-        segmentFanOut[segment] += fanOut;
-
-        cout << "Fan-Out de " << entry.first << ": " << fanOut << endl;
-
-        if (fanOut > maxFanOut) {
-            maxFanOut = fanOut;
-            maxFanOutIP = entry.first;
+void Graph::displayList() {
+    cout << "--------------------------------" << endl;
+    cout << "Lista de adyacencia" << endl;
+    for (int i = 0; i < V; i++) {
+        cout << "vertice: " << i << " [";
+        for (set<int>::iterator j = adj[i].begin(); j != adj[i].end(); j++) {
+            cout << *j << " ";
         }
+        cout << "]" << endl;
     }
+    cout << "--------------------------------" << endl;
+}
 
-    cout << "El nodo con el mayor Fan-Out es: " << maxFanOutIP << " con un Fan-Out de " << maxFanOut << endl;
-
-    int maxSegmentFanOut = 0;
-    string maxSegment;
-    for (const auto& entry : segmentFanOut) {
-        cout << "Fan-Out del segmento " << entry.first << ": " << entry.second << endl;
-
-        if (entry.second > maxSegmentFanOut) {
-            maxSegmentFanOut = entry.second;
-            maxSegment = entry.first;
-        }
+void Graph::maxFanOut(int n) {
+    int *maxFanOut = new int[n];
+    for (int i = 0; i < n; i++) {
+        maxFanOut[i] = 0; 
     }
-
-    cout << "Segmento con más fan-out: " << maxSegment << ", con: " << maxSegmentFanOut << " aristas o conexiones de salida" << endl;
-
-    int maxBootMasterFanOut = 0;
-    string bootMasterIP;
-    for (const auto& entry : adjList) {
-        string segment = entry.first.substr(0, entry.first.rfind('.'));
-        if (segment == maxSegment) {
-            if (fanOutCount[entry.first] > maxBootMasterFanOut) {
-                maxBootMasterFanOut = fanOutCount[entry.first];
-                bootMasterIP = entry.first;
+    for (int i = 0; i < V; i++) {
+        for (int j = 0; j < n; j++) {
+            if ( fanOut(i) > fanOut(maxFanOut[j])) {
+                for (int k = n - 1; k > j; k--) {
+                    maxFanOut[k] = maxFanOut[k - 1];
+                }
+                maxFanOut[j] = i;
+                break; 
             }
         }
     }
+    for (int i = 0; i < n; i++) {
+        cout << "Mayor Fan Out numero " << i + 1 << " : " << maxFanOut[i] << " FanOut: " << fanOut(maxFanOut[i]) << endl;
+    }
+}
 
-    cout << "IP boot master: " << bootMasterIP << " con: " << maxBootMasterFanOut << " fan-outs o conexiones (sumatoria de las conexiones de sus segmentos)" << endl;
+string extractIp(std::string line) {
+    string mes, dia, hora, ip;
+    stringstream extract(line);
+    extract >> mes >> dia >> hora >> ip;
+    return ip;
 }
 
 int main() {
-    try {
-        ifstream file("Bitacora.txt");
-        if (!file.is_open()) {
-            throw runtime_error("Error al abrir el archivo");
-        }
-
-        string line;
-        Graph g;
-
-        while (getline(file, line)) {
-            stringstream ss(line);
-            string month, day, time, ip, reason;
-            ss >> month >> day >> time >> ip >> reason;
-
-            g.addEdge(ip, reason);
-        }
-
-        g.displayGraph();
-        g.findFanOut();
-    } catch (const exception& e) {
-        cerr << "Error: " << e.what() << endl;
-        return 1;
+    fstream bitacora("bitacora.txt");
+    string line, ip, puerto;
+    Graph grafo(1000, 1000);
+    int arr[16807][4];
+    int cont=0;
+    while (getline(bitacora, line)) {
+        ip = extractIp(line);
+        istringstream iss(ip);
+        char dot;
+        int parte1, parte2, parte3, parte4;
+        iss >> parte1 >> dot >> parte2 >> dot >> parte3 >> dot >> parte4;
+        arr[cont][0] = parte1;
+        arr[cont][1] = parte2;
+        arr[cont][2] = parte3;
+        arr[cont][3] = parte4;
+        grafo.addEdge(parte1, parte2);
+        grafo.addEdge(parte2, parte3);
+        grafo.addEdge(parte3, parte4);
+        cont=cont +1;
     }
-
+    int fanOut=0;
+    int fanOutTemp=0;
+    string ipBootMaster="";
+    string tempIp="";
+    for(int i=0;i<cont;i++){
+        for (int j=0;j<4;j++){
+            fanOutTemp=fanOutTemp+grafo.fanOut(arr[i][j]);
+            if(j<=3){
+                tempIp=tempIp+to_string(arr[i][j])+".";
+            }else{
+                tempIp=tempIp+to_string(arr[i][j]);
+            }
+        }
+        if (fanOutTemp>fanOut){
+            fanOut=fanOutTemp;
+            ipBootMaster=tempIp;
+        }
+        fanOutTemp=0;
+        tempIp="";
+    }
+    int n;
+    cout<<"Dime el numero de segmentos con mayor Fan Out que quieres conocer "<<endl;
+    cin>>n;
+    grafo.maxFanOut(n);
+    cout<<"Ip BootMaster : "<<ipBootMaster<<" con "<< fanOut<<" conexiones de salida"<<endl;
     return 0;
 }
-
-
 
 //g++ "Act 4.3.cpp" -o "Act 4.3" -std=c++11
 
