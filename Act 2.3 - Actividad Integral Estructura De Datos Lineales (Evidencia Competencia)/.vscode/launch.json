@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "/Users/santosarellanoolarte/Documents/GitHub/Programming-of-Data-Structures-and-Fundamental-Algorithms/Act 2.3 - Actividad Integral Estructura De Datos Lineales (Evidencia Competencia)",
+      "program": "/Users/santosarellanoolarte/Documents/GitHub/Programming-of-Data-Structures-and-Fundamental-Algorithms/Act 2.3 - Actividad Integral Estructura De Datos Lineales (Evidencia Competencia)/build/Debug/outDebug"
+    }
+  ]
+}
