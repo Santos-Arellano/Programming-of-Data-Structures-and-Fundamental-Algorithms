@@ -1,26 +1,23 @@
-#ifndef HASHTABLE_H
-#define HASHTABLE_H
-
-#include "LinkedList.h"
+#pragma once
 #include <iostream>
+#include <string>
+#include "LinkedList.h"
 using namespace std;
 
 struct Buckets {
-    int key;
+    long long key;
     LinkedList list;
 };
 
 class HashTable {
 public:
     int size;
-    int cant_datos;
+    int bucketSize;
     Buckets* array;
 
     HashTable();
-    int hashFunction(int ip);
-    void insert(int ip);
-    void remove(int key);
-    void print(int key);
+    long long hashFunction(long long ip);
+    void insert(long long ip, const string& line);
+    void print(long long ip);
 };
 
-#endif

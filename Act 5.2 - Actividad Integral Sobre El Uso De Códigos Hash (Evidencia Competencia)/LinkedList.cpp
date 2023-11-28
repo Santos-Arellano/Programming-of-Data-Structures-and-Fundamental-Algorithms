@@ -1,31 +1,22 @@
 #include "LinkedList.h"
 
 LinkedList::LinkedList() {
-    this->head = NULL;
-    this->tail = head;
+    this->head = nullptr;
+    this->tail = nullptr;
 }
 
-void LinkedList::push(int num, int line) {
-    node *nodo = new node;
+void LinkedList::push(long long num, const string& line) {
+    node* nodo = new node;
     nodo->data = num;
     nodo->line = line;
     nodo->next = head;
     head = nodo;
 }
 
-void LinkedList::dell() {
-    if (head != nullptr) {
-        node *temp = head;
-        head = head->next;
-        delete temp;
-    }
-}
-
 void LinkedList::print() {
-    node *current = head;
+    node* current = head;
     while (current != nullptr) {
-        cout << current->data << " ";
+        cout << "IP: " << current->data << " - Line: " << current->line << "\n";
         current = current->next;
     }
-    cout << endl;
 }

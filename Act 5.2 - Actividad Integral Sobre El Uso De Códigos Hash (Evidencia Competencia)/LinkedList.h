@@ -1,24 +1,22 @@
-#ifndef LINKEDLIST_H
-#define LINKEDLIST_H
-
+#pragma once
 #include <iostream>
 using namespace std;
 
 struct node {
-    int data;
-    int line;
-    struct node *next;
+    long long data;
+    string line;
+    struct node* next;
 };
 
 class LinkedList {
 public:
-    node *head;
-    node *tail;
+    // Propiedades
+    node* head;
+    node* tail;
 
+    // Métodos
     LinkedList();
-    void push(int, int);
-    void dell();
+    void push(long long num, const string& line);
     void print();
 };
 
-#endif
